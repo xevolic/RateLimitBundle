@@ -31,7 +31,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Noxlogic\\RateLimitBundle\\": ""
+            "Noxlogic\\RateLimitBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Noxlogic\\RateLimitBundle\\Tests\\": "tests/"
         }
     }
 }

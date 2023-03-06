@@ -9,6 +9,8 @@ use Noxlogic\RateLimitBundle\Events\RateLimitEvents;
 use Noxlogic\RateLimitBundle\Service\RateLimitService;
 use Noxlogic\RateLimitBundle\Tests\EventListener\MockStorage;
 use Noxlogic\RateLimitBundle\Tests\TestCase;
+use Noxlogic\RateLimitBundle\Util\PathLimitProcessor;
+use PHPUnit\Framework\MockObject;
 use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,18 +32,13 @@ class RateLimitAnnotationListenerTest extends TestCase
         }
     }
 
-    /**
-     * @var MockStorage
-     */
-    protected $mockStorage;
-
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
-    protected $mockPathLimitProcessor;
+    protected MockStorage $mockStorage;
+    protected PathLimitProcessor| MockObject $mockPathLimitProcessor;
 
     protected function setUp(): void
     {
         $this->mockStorage = new MockStorage();
-        $this->mockPathLimitProcessor = $this->getMockBuilder('Noxlogic\RateLimitBundle\Util\PathLimitProcessor')
+        $this->mockPathLimitProcessor = $this->getMockBuilder(PathLimitProcessor::class)
             ->disableOriginalConstructor()
             ->getMock();
     }
@@ -133,9 +130,16 @@ class RateLimitAnnotationListenerTest extends TestCase
             'period' => 200
         ));
 
+        $this->mockPathLimitProcessor
+            ->expects($this->any())
+            ->method('getRateLimit')
+            ->will($this->returnValue($rateLimit))
+        ;
+
         $this->mockPathLimitProcessor->expects($this->any())
-                                     ->method('getRateLimit')
-                                     ->will($this->returnValue($rateLimit));
+            ->method('getMatchedPath')
+            ->will($this->returnValue(''))
+        ;
 
         $listener->onKernelController($event);
     }
